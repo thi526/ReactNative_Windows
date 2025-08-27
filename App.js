@@ -1,127 +1,79 @@
+import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, StatusBar } from 'react-native';
+import { StyleSheet, Text, View, Button, TextInput, SafeAreaView, TouchableOpacity, Keyboard } from 'react-native';
 
 export default function App() {
-  const [display, setDisplay] = useState('0');
-  const [firstValue, setFirstValue] = useState(null);
-  const [operator, setOperator] = useState(null);
-  const [waitingForSecondValue, setWaitingForSecondValue] = useState(false);
+  const [base, setBase] = useState('');
+  const [altura, setAltura] = useState('');
+  const [area, setArea] = useState('');
 
-  const handleNumberPress = (number) => {
-    if (waitingForSecondValue) {
-      setDisplay(String(number));
-      setWaitingForSecondValue(false);
-    } else {
-      setDisplay(display === '0' ? String(number) : display + number);
-    }
-  };
-
-  const handleOperatorPress = (nextOperator) => {
-    const inputValue = parseFloat(display);
-
-    if (firstValue === null) {
-      setFirstValue(inputValue);
-    } else if (operator) {
-      const result = performCalculation();
-      setDisplay(String(result));
-      setFirstValue(result);
-    }
-
-    setWaitingForSecondValue(true);
-    setOperator(nextOperator);
-  };
-
-  const performCalculation = () => {
-    const inputValue = parseFloat(display);
+  function calcularArea() {
+    // Fecha o teclado virtual
+    Keyboard.dismiss();
     
-    switch (operator) {
-      case '+':
-        return firstValue + inputValue;
-      case '-':
-        return firstValue - inputValue;
-      case '×':
-        return firstValue * inputValue;
-      case '÷':
-        return inputValue !== 0 ? firstValue / inputValue : 0;
-      default:
-        return inputValue;
+    if (base > 0 && altura > 0) {
+      setArea((parseFloat(base) * parseFloat(altura)) / 2);
+    } else {
+      setArea('');
+      alert('Por favor, insira valores válidos para base e altura!');
     }
-  };
+  }
 
-  const handleEqual = () => {
-    const inputValue = parseFloat(display);
-
-    if (firstValue !== null && operator) {
-      const result = performCalculation();
-      setDisplay(String(result));
-      setFirstValue(result);
-      setOperator(null);
-      setWaitingForSecondValue(true);
-    }
-  };
-
-  const handleClear = () => {
-    setDisplay('0');
-    setFirstValue(null);
-    setOperator(null);
-    setWaitingForSecondValue(false);
-  };
-
-  const handleDecimal = () => {
-    if (waitingForSecondValue) {
-      setDisplay('0.');
-      setWaitingForSecondValue(false);
-    } else if (display.indexOf('.') === -1) {
-      setDisplay(display + '.');
-    }
-  };
-
-  const Button = ({ title, onPress, style, textStyle }) => (
-    <TouchableOpacity style={[styles.button, style]} onPress={onPress}>
-      <Text style={[styles.buttonText, textStyle]}>{title}</Text>
-    </TouchableOpacity>
-  );
+  function limparCampos() {
+    setBase('');
+    setAltura('');
+    setArea('');
+  }
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar style="auto" />
       
-      <View style={styles.displayContainer}>
-        <Text style={styles.displayText}>{display}</Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>Calculadora de Área do Triângulo</Text>
+        <Text style={styles.subtitle}>Insira os valores da base e altura</Text>
       </View>
 
-      <View style={styles.buttonsContainer}>
-        <View style={styles.row}>
-          <Button title="C" onPress={handleClear} style={styles.clearButton} />
-          <Button title="÷" onPress={() => handleOperatorPress('÷')} style={styles.operatorButton} />
-        </View>
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Base do triângulo:</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Digite o valor da base"
+          keyboardType="numeric"
+          value={base}
+          onChangeText={setBase}
+        />
 
-        <View style={styles.row}>
-          <Button title="7" onPress={() => handleNumberPress(7)} />
-          <Button title="8" onPress={() => handleNumberPress(8)} />
-          <Button title="9" onPress={() => handleNumberPress(9)} />
-          <Button title="×" onPress={() => handleOperatorPress('×')} style={styles.operatorButton} />
-        </View>
+        <Text style={styles.label}>Altura do triângulo:</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Digite o valor da altura"
+          keyboardType="numeric"
+          value={altura}
+          onChangeText={setAltura}
+        />
+      </View>
 
-        <View style={styles.row}>
-          <Button title="4" onPress={() => handleNumberPress(4)} />
-          <Button title="5" onPress={() => handleNumberPress(5)} />
-          <Button title="6" onPress={() => handleNumberPress(6)} />
-          <Button title="-" onPress={() => handleOperatorPress('-')} style={styles.operatorButton} />
-        </View>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity 
+          style={styles.calcularButton} 
+          onPress={calcularArea}
+        >
+          <Text style={styles.buttonText}>Calcular Área</Text>
+        </TouchableOpacity>
 
-        <View style={styles.row}>
-          <Button title="1" onPress={() => handleNumberPress(1)} />
-          <Button title="2" onPress={() => handleNumberPress(2)} />
-          <Button title="3" onPress={() => handleNumberPress(3)} />
-          <Button title="+" onPress={() => handleOperatorPress('+')} style={styles.operatorButton} />
-        </View>
+        <TouchableOpacity 
+          style={styles.limparButton} 
+          onPress={limparCampos}
+        >
+          <Text style={styles.buttonText}>Limpar</Text>
+        </TouchableOpacity>
+      </View>
 
-        <View style={styles.row}>
-          <Button title="0" onPress={() => handleNumberPress(0)} style={styles.zeroButton} />
-          <Button title="." onPress={handleDecimal} />
-          <Button title="=" onPress={handleEqual} style={styles.equalsButton} />
-        </View>
+      <View style={styles.resultContainer}>
+        <Text style={styles.resultText}>
+          {area ? `Área do triângulo: ${area}` : ''}
+        </Text>
       </View>
     </SafeAreaView>
   );
@@ -130,52 +82,78 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1c1c1c',
-  },
-  displayContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'flex-end',
+    backgroundColor: '#f5f5f5',
     padding: 20,
   },
-  displayText: {
-    fontSize: 48,
-    color: 'white',
-    fontWeight: '300',
+  header: {
+    alignItems: 'center',
+    marginBottom: 30,
+    marginTop: 20,
   },
-  buttonsContainer: {
-    flex: 2,
-    padding: 10,
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
     marginBottom: 10,
   },
-  button: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#505050',
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
   },
-  buttonText: {
-    fontSize: 24,
-    color: 'white',
+  inputContainer: {
+    marginBottom: 30,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 8,
+    color: '#333',
     fontWeight: '500',
   },
-  clearButton: {
-    backgroundColor: '#d4d4d2',
+  input: {
+    height: 50,
+    borderColor: '#ddd',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    marginBottom: 20,
+    backgroundColor: '#fff',
+    fontSize: 16,
   },
-  operatorButton: {
-    backgroundColor: '#ff9500',
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 30,
   },
-  equalsButton: {
-    backgroundColor: '#ff9500',
+  calcularButton: {
+    backgroundColor: '#4CAF50',
+    padding: 15,
+    borderRadius: 8,
+    flex: 1,
+    marginRight: 10,
+    alignItems: 'center',
   },
-  zeroButton: {
-    width: 150,
-    borderRadius: 35,
+  limparButton: {
+    backgroundColor: '#f44336',
+    padding: 15,
+    borderRadius: 8,
+    flex: 1,
+    marginLeft: 10,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  resultContainer: {
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#e8f5e9',
+    borderRadius: 8,
+  },
+  resultText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#2e7d32',
   },
 });
